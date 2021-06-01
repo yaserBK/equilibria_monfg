@@ -8,6 +8,9 @@ import time
 import argparse
 from utils import *
 
+
+
+
 def get_recommendations():
     # recommendations are set as a list of probabilities (rec_probs) and a list of recommendation pairs (recs)
     global recs, rec_probs  # these are specified next to the payoff matrices for the MONFG below
@@ -48,7 +51,7 @@ def calc_payoffs():
 
 
 def decay_params():
-    global alpha, epsilon
+    alpha, epsilon
     alpha *= alpha_decay
     epsilon *= epsilon_decay
     for ag in range(num_agents):
@@ -180,17 +183,18 @@ else:
     recs = [[0, 0], [1, 1]]
     CE_sgn = [[0.5, 0.5], [0.5, 0.5]]
 
+### TODO: THIS BLOCK NEEDS MODIFICATION
 
-ce_ser_o = np.zeros(num_objectives)
+ce_ser_o = np.zeros(num_objectives) #  TODO: CHANGES TO BE ADDED HERE (lines 184 - 185)
 
 rec_obj1 = [payoffsObj1[el[0], el[1]] for el in recs]
 ce_ser_o[0] = np.dot(rec_probs, rec_obj1)
 
 rec_obj2 = [payoffsObj2[el[0], el[1]] for el in recs]
-ce_ser_o[1] = np.dot(rec_probs, rec_obj2)
+ce_ser_o[1] = np.dot(rec_probs, rec_obj2) ## TODO: CHANGES TO BE ADDED HERE
 
 print("Expected return o1 and o2: ", ce_ser_o)
-ce_ser = [calc_ser(i, ce_ser_o) for i in range(2)]
+ce_ser = [calc_ser(i, ce_ser_o) for i in range(2)] ## TODO: CHANGES TO BE ADDED HEREE
 print("SER Agent 1 and 2: ", ce_ser)
 
 
@@ -261,7 +265,7 @@ for r in range(num_runs):
     action_hist = [[], []]
     for e in range(num_episodes):
         do_episode(e)
-        payoff_episode_log1.append([e, r, ql.calc_ser(0, payoffs[0])])
+        payoff_episode_log1.append([e, r, ql.calc_ser(0, payoffs[0])])  ### TODO: REPLICATE SEGMENT FOR ESR CASE
         payoff_episode_log2.append([e, r, ql.calc_ser(1, payoffs[1])])
         for i in range(num_agents):
             action_hist[i].append(selected_actions[i])
