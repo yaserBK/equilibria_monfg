@@ -1,14 +1,12 @@
 import random
 import pandas as pd
-import QLearnerSER as ql
+import SERLearner as ql
 import numpy as np
-from QLearnerSER import QLearnerSER, calc_ser
+from SERLearner import SERLearner, calc_ser
 from collections import Counter
 import time
 import argparse
 from utils import *
-
-
 
 
 def get_recommendations():
@@ -81,8 +79,8 @@ def reset(opt=False, rand_prob=False):
     global agents, current_states, selected_actions, alpha, epsilon
     agents.clear()
     for ag in range(num_agents):
-        new_agent = QLearnerSER(ag, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt, multi_ce,
-                                ce_ser[ag], single_ce, rand_prob, CE_sgn[ag])
+        new_agent = SERLearner(ag, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt, multi_ce,
+                               ce_ser[ag], single_ce, rand_prob, CE_sgn[ag])
         agents.append(new_agent)
     current_states = [0, 0]
     selected_actions = [-1, -1]
