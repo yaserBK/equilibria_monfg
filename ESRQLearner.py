@@ -98,7 +98,7 @@
 #     # Calculates the SER for a given strategy using the agent's own Q values ----TODO: CHANGE TO CALCULATE ESR BASED ON CURRENT STRATEGIES
 #     def calc_ser_from_strategy(self, strategy):
 #         expected_vec = self.calc_expected_vec(self.current_state, strategy)
-#         ser = calc_ser(self.agent_id, expected_vec) ### MODIFY THIS SEGMENT
+#         ser = calc_returns(self.agent_id, expected_vec) ### MODIFY THIS SEGMENT
 #         return ser
 #
 #     # Calculates the expected payoff vector for a given strategy using the agent's own Q values
@@ -121,7 +121,7 @@
 #         return state
 #
 # #  look to code ------- TODO: CHANGE TO CALC ESR
-# def calc_ser(agent, vector):
+# def calc_returns(agent, vector):
 #     ser = 0
 #     if agent == 0:
 #         ser = vector[0] ** 2 + vector[1] ** 2

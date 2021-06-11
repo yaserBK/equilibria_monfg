@@ -3,6 +3,7 @@ import pandas as pd
 import SERLearner as ql
 import numpy as np
 from SERLearner import SERLearner, calc_ser
+from ESRLearner import ESRLeaner, calc_esr
 from collections import Counter
 import time
 import argparse
@@ -183,6 +184,8 @@ else:
 
 ### TODO: THIS BLOCK NEEDS MODIFICATION
 
+# Approach:  Create if else statements to check type of agent that exists
+
 ce_ser_o = np.zeros(num_objectives) #  TODO: CHANGES TO BE ADDED HERE (lines 184 - 185)
 
 rec_obj1 = [payoffsObj1[el[0], el[1]] for el in recs]
@@ -192,7 +195,7 @@ rec_obj2 = [payoffsObj2[el[0], el[1]] for el in recs]
 ce_ser_o[1] = np.dot(rec_probs, rec_obj2) ## TODO: CHANGES TO BE ADDED HERE
 
 print("Expected return o1 and o2: ", ce_ser_o)
-ce_ser = [calc_ser(i, ce_ser_o) for i in range(2)] ## TODO: CHANGES TO BE ADDED HEREE
+ce_ser = [calc_ser(i, ce_ser_o) for i in range(2)] ## THIS BLOCK OF CODE IS FUCKING STUPID. YOU COULD HAVE A CHECK PLACED AROUND IT TO EASILY DETECT WHAT KIND OF AGENT IT IS
 print("SER Agent 1 and 2: ", ce_ser)
 
 
@@ -263,8 +266,8 @@ for r in range(num_runs):
     action_hist = [[], []]
     for e in range(num_episodes):
         do_episode(e)
-        payoff_episode_log1.append([e, r, ql.calc_ser(0, payoffs[0])])  ### TODO: REPLICATE SEGMENT FOR ESR CASE
-        payoff_episode_log2.append([e, r, ql.calc_ser(1, payoffs[1])])
+        payoff_episode_log1.append([e, r, ql.calc_returns(0, payoffs[0])])  ### TODO: REPLICATE SEGMENT FOR ESR CASE
+        payoff_episode_log2.append([e, r, ql.calc_returns(1, payoffs[1])])
         for i in range(num_agents):
             action_hist[i].append(selected_actions[i])
         if e >= 0.9 * num_episodes:

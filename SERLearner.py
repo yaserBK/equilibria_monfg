@@ -12,7 +12,7 @@ class SERLearner(QLearner):
         super().__init__(self, agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt, multi_ce,
                          single_ce, rand_prob, ce_sgn)
 
-    def calc_ser(agent, vector):
+    def calc_returns(agent, vector):
         ser = 0
         if agent == 0:
             ser = vector[0] ** 2 + vector[1] ** 2
@@ -50,8 +50,17 @@ class SERLearner(QLearner):
 
     def calc_ser_from_strategy(self, strategy):
         expected_vec = self.calc_expected_vec(self.current_state, strategy)
-        ser = self.calc_ser(self.agent_id, expected_vec)
+        ser = self.calc_returns(self.agent_id, expected_vec)
         return ser
 
     def objective(self, strategy):
         return - self.calc_ser_from_strategy(strategy)
+
+
+def calc_ser(agent, vector):
+    ser = 0
+    if agent == 0:
+        ser = vector[0] ** 2 + vector[1] ** 2
+    elif agent == 1:
+        ser = vector[0] * vector[1]
+    return ser

@@ -9,9 +9,10 @@ from abc import ABC, abstractmethod
 
 
 class QLeaner(ABC):
-    def __init__(self, agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt=False,
+    def __init__(self, agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, obj_fn, opt=False,
                  multi_ce=False, single_ce=False, rand_prob=False, ce_sgn=None):
         self.agent_id = agent_id
+        self.obj_fn= obj_fn # specify which objective function the agent uses
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
@@ -63,12 +64,16 @@ class QLeaner(ABC):
 
     # this is the objective function to be minimised by the nonlinear optimiser
     # (therefore it returns the negative of SER)
-    @abc.abstractmethod
+    @abstractmethod
     def objective(self, strategy):
         return
 
     @abstractmethod
     def calc_mixed_strategy_nonlinear(self, state):
+        return
+
+    @abstractmethod
+    def calc_returns(agent, vector):
         return
 
     # Calculates the expected payoff vector for a given strategy using the agent's own Q values
