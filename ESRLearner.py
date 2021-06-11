@@ -2,13 +2,13 @@ import QLearner
 
 class ESRLeaner(QLearner):
 
-    def __init__(self, agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt=False,
+    def __init__(self, agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, obj_fn, opt=False,
                  multi_ce=False, ce_esr=None, single_ce=False, rand_prob=False, ce_sgn=None):
         self.ce_esr = ce_esr
-        super().__init__(self, agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt=opt,
+        super().__init__(self, agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, obj_fn, opt=opt,
                          multi_ce=multi_ce, single_ce=single_ce, rand_prob=rand_prob, ce_sgn=ce_sgn)
 
-    def calc_returns(agent, vector):
+    def calc_returns(self, vector):
         pass
 
     def calc_mixed_strategy_nonlinear(self, state):

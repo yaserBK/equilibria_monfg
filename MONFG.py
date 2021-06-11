@@ -42,7 +42,7 @@ def select_recommended_actions(states):
 
 
 def calc_payoffs():
-    global payoffs
+    global payoffs   # YASER - SO THIS IS WHERE PAYOFFS ARE DECLARED!!!!!!!
     payoffs.clear()
     for ag in range(num_agents):
         payoffs.append([payoffsObj1[selected_actions[0]][selected_actions[1]],
@@ -205,7 +205,7 @@ num_states = num_actions  # as the number of states is equal to the number of po
 agents = []
 prev_states = [0, 0]
 selected_actions = [-1, -1]
-payoffs = [-1, -1]
+payoffs = [-1, -1]   # [WHAT IN GODS NAME ARE YOU FOR?]
 current_states = [0, 0]
 alpha = 0.05
 alpha_start = 0.05
@@ -266,7 +266,7 @@ for r in range(num_runs):
     action_hist = [[], []]
     for e in range(num_episodes):
         do_episode(e)
-        payoff_episode_log1.append([e, r, ql.calc_returns(0, payoffs[0])])  ### TODO: REPLICATE SEGMENT FOR ESR CASE
+        payoff_episode_log1.append([e, r, ql.calc_returns(0, payoffs[0])])  ### where does payoffs[] list come from?
         payoff_episode_log2.append([e, r, ql.calc_returns(1, payoffs[1])])
         for i in range(num_agents):
             action_hist[i].append(selected_actions[i])

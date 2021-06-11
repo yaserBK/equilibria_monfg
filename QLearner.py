@@ -31,6 +31,10 @@ class QLeaner(ABC):
         self.rand_prob = rand_prob
         self.ce_sgn = ce_sgn
 
+    # TODO: create seperate functions for every utility function
+    # TODO 2:  put them all in a list
+    # TODO 3: create a function that pulls a function out of the list and passes in params for each function
+
     def update_q_table(self, prev_state, action, curr_state, reward):
         old_q = self.q_table[prev_state][action]
         next_q = self.q_table[curr_state, :, :]
