@@ -3,7 +3,7 @@ import pandas as pd
 import SERLearner as ql
 import numpy as np
 from SERLearner import SERLearner, calc_ser
-from ESRLearner import ESRLeaner, calc_esr
+from ESRLearner import ESRLearner, calc_esr
 from collections import Counter
 import time
 import argparse
@@ -70,14 +70,16 @@ def do_episode(ep):
     if provide_recs:
         prev_states = get_recommendations()
     if ep < recommendation_time:
-        selected_actions = select_recommended_actions(prev_states)
+        selected_actions = select_recommended_actions(prev_states)  ### Modify this method
     else:
-        selected_actions = select_actions(prev_states)
+        selected_actions = select_actions(prev_states) ### MODIFY this method
     calc_payoffs()
     update()
     if ep > recommendation_time:
         decay_params()
 
+
+# HERE IS WHERE WE NEED TO MODIFY THE CODE TO INCLUDE THE INIT OF ESR AGENTS
 def reset(opt=False, rand_prob=False):
     global agents, current_states, selected_actions, alpha, epsilon
     agents.clear()
@@ -119,7 +121,7 @@ python MONFG.py -game game1
 
 args = parser.parse_args()
 
-game = args.game
+game = args.game  #### YOINKS GAME PARAMETER
 
 num_objectives = 2
 ce_ser = None
@@ -129,9 +131,11 @@ if game == 'game1':
     payoffsObj1 = np.array([[4, 3, 2],
                             [3, 2, 1],
                             [2, 1, 0]])
+
     payoffsObj2 = np.array([[0, 1, 2],
                             [1, 2, 3],
                             [2, 3, 4]])
+
     rec_probs = [0.75, 0.25]
     recs = [[0, 1], [2, 1]]
     CE_sgn = [[0.75, 0, 0.25], [0, 1, 0]]
@@ -141,8 +145,10 @@ elif game == 'game2noM':
     # 2 action game that has no NE, it is the original (Im)balancing act game without M
     payoffsObj1 = np.array([[4, 2],
                             [2, 0]])
+
     payoffsObj2 = np.array([[0, 2],
                             [2, 4]])
+
     rec_probs = [0.25, 0.25, 0.25, 0.25]
     recs = [[0, 0], [0, 1], [1, 0], [1, 1]]
     CE_sgn = [[0.5, 0.5], [0.5, 0.5]]
@@ -152,8 +158,10 @@ elif game == 'game2noR':
     # the pure strategy NE is (L,M)
     payoffsObj1 = np.array([[4, 3],
                             [3, 2]])
+
     payoffsObj2 = np.array([[0, 1],
                             [1, 2]])
+
     rec_probs = [1.0]
     recs = [[0, 1]]
     CE_sgn = [[1.0, 0.0], [0.0, 1.0]]
@@ -164,9 +172,11 @@ elif game == 'game4':
     payoffsObj1 = np.array([[4, 1, 2],
                             [3, 3, 1],
                             [1, 2, 1]])
+
     payoffsObj2 = np.array([[1, 2, 1],
                             [1, 2, 2],
                             [2, 1, 3]])
+
     rec_probs = [0.5, 0.5]
     recs = [[0, 0], [1, 1]]
     #rec_probs = [1.0]
@@ -178,15 +188,17 @@ else:
     # 2 action game that has multiple pure strategy NE
     payoffsObj1 = np.array([[4, 1],
                             [3, 3]])
+
     payoffsObj2 = np.array([[1, 2],
                             [1, 2]])
+
     rec_probs = [0.5, 0.5]
     recs = [[0, 0], [1, 1]]
     CE_sgn = [[0.5, 0.5], [0.5, 0.5]]
 
 ### TODO: THIS BLOCK NEEDS MODIFICATION
 
-# Approach:  Create if else statements to check type of agent that exists
+
 
 ce_ser_o = np.zeros(num_objectives) #  TODO: CHANGES TO BE ADDED HERE (lines 184 - 185)
 
@@ -272,6 +284,8 @@ for r in range(num_runs):
         do_episode(e)
 
         #  TODO: Rework this segment, it calls the calc_ser method unrelated to any object in particular... but how?
+
+        # simple if else rework with if agent = ser, elif etc...
         payoff_episode_log1.append([e, r, ql.calc_ser(0, payoffs[0])])  ### where does payoffs[] list come from?
         payoff_episode_log2.append([e, r, ql.calc_ser(1, payoffs[1])])
         for i in range(num_agents):
