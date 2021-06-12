@@ -9,6 +9,8 @@ import time
 import argparse
 from utils import *
 
+#  TODO: MIGHT HAVE TO COMPLETELY REWORK THIS CLASS!!! NO BIG DEAL.
+
 
 def get_recommendations():
     # recommendations are set as a list of probabilities (rec_probs) and a list of recommendation pairs (recs)
@@ -26,7 +28,7 @@ def get_recommendations():
     recommendation = recs[selected_index].copy()
     return recommendation
 
-
+# returns choice of selected actions, used in calcpayoffs method.
 def select_actions(states):
     selected = []
     for ag in range(num_agents):
@@ -259,6 +261,8 @@ else:
 print(path_data)
 mkdir_p(path_data)
 
+
+#  this whole block will need some heavy changes, particularly around the calc_returns function
 start = time.time()
 for r in range(num_runs):
     print("Starting run ", r)
@@ -266,8 +270,10 @@ for r in range(num_runs):
     action_hist = [[], []]
     for e in range(num_episodes):
         do_episode(e)
-        payoff_episode_log1.append([e, r, ql.calc_returns(0, payoffs[0])])  ### where does payoffs[] list come from?
-        payoff_episode_log2.append([e, r, ql.calc_returns(1, payoffs[1])])
+
+        #  TODO: Rework this segment, it calls the calc_ser method unrelated to any object in particular... but how?
+        payoff_episode_log1.append([e, r, ql.calc_ser(0, payoffs[0])])  ### where does payoffs[] list come from?
+        payoff_episode_log2.append([e, r, ql.calc_ser(1, payoffs[1])])
         for i in range(num_agents):
             action_hist[i].append(selected_actions[i])
         if e >= 0.9 * num_episodes:

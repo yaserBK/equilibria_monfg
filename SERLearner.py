@@ -1,6 +1,6 @@
 import numpy as np
 
-import QLearner
+from QLearner import QLearner
 from scipy.optimize import minimize
 
 
@@ -9,11 +9,14 @@ class SERLearner(QLearner):
     def __init__(self, agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, obj_fn, opt=False,
                  multi_ce=False, ce_ser=None, single_ce=False, rand_prob=False, ce_sgn=None):
         self.ce_ser = ce_ser
-        super().__init__(self, agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, obj_fn, opt, multi_ce,
+        super().__init__(agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, obj_fn, opt,
+                         multi_ce,
                          single_ce, rand_prob, ce_sgn)
 
-    #  calculates SE Returns using self.obj_fn value and provided vector.
-    def calc_returns(self, vector):
+    def print_name(self):
+        print("SER ZING")
+
+    def calc_returns(self, agent, vector):
         ser = 0
         if self.obj_fn == 0:
             ser = vector[0] ** 2 + vector[1] ** 2

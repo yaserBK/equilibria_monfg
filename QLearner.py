@@ -8,11 +8,11 @@ import itertools
 from abc import ABC, abstractmethod
 
 
-class QLeaner(ABC):
+class QLearner(ABC):
     def __init__(self, agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, obj_fn, opt=False,
                  multi_ce=False, single_ce=False, rand_prob=False, ce_sgn=None):
         self.agent_id = agent_id
-        self.obj_fn= obj_fn # specify which objective function the agent uses
+        self.obj_fn = obj_fn  # specify which objective function the agent uses
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
@@ -70,15 +70,18 @@ class QLeaner(ABC):
     # (therefore it returns the negative of SER)
     @abstractmethod
     def objective(self, strategy):
-        return
+        pass
 
     @abstractmethod
     def calc_mixed_strategy_nonlinear(self, state):
-        return
+        pass
 
     @abstractmethod
-    def calc_returns(agent, vector):
-        return
+    def calc_returns(self, agent, vector):
+        pass
+
+    def print_name(self):
+        print("zing")
 
     # Calculates the expected payoff vector for a given strategy using the agent's own Q values
     def calc_expected_vec(self, state, strategy):
