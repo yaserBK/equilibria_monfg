@@ -9,12 +9,8 @@ class SERLearner(QLearner):
     def __init__(self, agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, obj_fn, opt=False,
                  multi_ce=False, ce_ser=None, single_ce=False, rand_prob=False, ce_sgn=None):
         self.ce_ser = ce_ser
-        super().__init__(agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, obj_fn, opt,
-                         multi_ce,
+        super().__init__(agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt, multi_ce,
                          single_ce, rand_prob, ce_sgn)
-
-    def print_name(self):
-        print("SER ZING")
 
     def calc_returns(self, agent, vector):
         ser = 0
@@ -23,6 +19,19 @@ class SERLearner(QLearner):
         elif self.obj_fn == 1:
             ser = vector[0] * vector[1]
         return ser
+
+    # Calculates the expected payoff vector for a given strategy using the agent's own Q values
+    def calc_expected_vec(self, state, strategy):
+        expected_vec = np.zeros(self.num_objectives)
+        if not self.multi_CE:
+            for o in range(self.num_objectives):
+                expected_vec[o] = np.dot(self.q_table[state, :, o], np.array(strategy))
+        else:
+            expected_tmp = sum(self.ce_sgn[i] * self.q_table[i, :, :] for i in range(len(self.ce_sgn)))
+            # print("Expectation over signals:", expected_tmp)
+            for o in range(self.num_objectives):
+                expected_vec[o] = np.dot(expected_tmp[:, o], np.array(strategy))
+        return expected_vec
 
     def calc_mixed_strategy_nonlinear(self, state):
         if self.rand_prob:
@@ -54,7 +63,7 @@ class SERLearner(QLearner):
 
     def calc_ser_from_strategy(self, strategy):
         expected_vec = self.calc_expected_vec(self.current_state, strategy)
-        ser = self.calc_returns(self.agent_id, expected_vec)
+        ser = calc_ser(self.agent_id, expected_vec)
         return ser
 
     def objective(self, strategy):
@@ -68,3 +77,8 @@ def calc_ser(agent, vector):
     elif agent == 1:
         ser = vector[0] * vector[1]
     return ser
+
+
+# what are the vectors being piped in?
+# appears to be the payoffs...
+

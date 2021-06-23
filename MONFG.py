@@ -1,6 +1,7 @@
 import random
 import pandas as pd
-import SERLearner as ql
+import SERLearner as SERql
+import ESRLearner as ESRql
 import numpy as np
 from SERLearner import SERLearner, calc_ser
 from ESRLearner import ESRLearner, calc_esr
@@ -8,6 +9,7 @@ from collections import Counter
 import time
 import argparse
 from utils import *
+
 
 #  TODO: MIGHT HAVE TO COMPLETELY REWORK THIS CLASS!!! NO BIG DEAL.
 
@@ -18,15 +20,16 @@ def get_recommendations():
     dice = random.uniform(0.0, 1.0)
     sum_probs = 0.0
     selected_index = -1
-    for rec in range(len(rec_probs)-1):
+    for rec in range(len(rec_probs) - 1):
         sum_probs += rec_probs[rec]
         if dice < sum_probs:
             selected_index = rec
             break
     if selected_index < 0:
-        selected_index = len(recs)-1
+        selected_index = len(recs) - 1
     recommendation = recs[selected_index].copy()
     return recommendation
+
 
 # returns choice of selected actions, used in calcpayoffs method.
 def select_actions(states):
@@ -44,7 +47,7 @@ def select_recommended_actions(states):
 
 
 def calc_payoffs():
-    global payoffs   # YASER - SO THIS IS WHERE PAYOFFS ARE DECLARED!!!!!!!
+    global payoffs  # YASER - SO THIS IS WHERE PAYOFFS ARE DECLARED!!!!!!!
     payoffs.clear()
     for ag in range(num_agents):
         payoffs.append([payoffsObj1[selected_actions[0]][selected_actions[1]],
@@ -72,7 +75,7 @@ def do_episode(ep):
     if ep < recommendation_time:
         selected_actions = select_recommended_actions(prev_states)  ### Modify this method
     else:
-        selected_actions = select_actions(prev_states) ### MODIFY this method
+        selected_actions = select_actions(prev_states)  ### MODIFY this method
     calc_payoffs()
     update()
     if ep > recommendation_time:
@@ -95,7 +98,6 @@ def reset(opt=False, rand_prob=False):
 
 parser = argparse.ArgumentParser()
 
-
 parser.add_argument('-opt_init', dest='opt_init', action='store_true', help="optimistic initialization")
 parser.add_argument('-game', type=str, default='game1', help="which MONFG game to play")
 parser.add_argument('-rand_prob', dest='rand_prob', action='store_true', help="rand init for optimization prob")
@@ -107,6 +109,10 @@ parser.add_argument('-rec_time', type=int, default=0, help="define the number of
 parser.add_argument('-runs', type=int, default=100, help="number of trials")
 parser.add_argument('-episodes', type=int, default=10000, help="number of episodes")
 
+#  Allows the user to chose optimization criteria (either SER or ESR) for row and column players
+parser.add_argument('-row', type=str, default="SER", help="specify optimization criteria for row player")
+parser.add_argument('-column', type=str, default="SER", help="specify optimization criteria for column player")
+
 '''
 Game 1, run multi-signal CE, under SER
 python MONFG.py -game game1 -mCE -rec_time 500
@@ -117,7 +123,6 @@ python MONFG.py -game game1 -sCE -rec_time 500
 Game 1, run NE, under SER
 python MONFG.py -game game1
 '''
-
 
 args = parser.parse_args()
 
@@ -179,9 +184,9 @@ elif game == 'game4':
 
     rec_probs = [0.5, 0.5]
     recs = [[0, 0], [1, 1]]
-    #rec_probs = [1.0]
-    #recs = [[0, 0]]
-    #recs = [[1, 1]]
+    # rec_probs = [1.0]
+    # recs = [[0, 0]]
+    # recs = [[1, 1]]
     CE_sgn = [[0.5, 0.5, 0.0], [0.5, 0.5, 0.0]]
 
 else:
@@ -199,19 +204,19 @@ else:
 ### TODO: THIS BLOCK NEEDS MODIFICATION
 
 
-
-ce_ser_o = np.zeros(num_objectives) #  TODO: CHANGES TO BE ADDED HERE (lines 184 - 185)
+ce_ser_o = np.zeros(num_objectives)  # TODO: CHANGES TO BE ADDED HERE (lines 184 - 185)
 
 rec_obj1 = [payoffsObj1[el[0], el[1]] for el in recs]
 ce_ser_o[0] = np.dot(rec_probs, rec_obj1)
 
 rec_obj2 = [payoffsObj2[el[0], el[1]] for el in recs]
-ce_ser_o[1] = np.dot(rec_probs, rec_obj2) ## TODO: CHANGES TO BE ADDED HERE
+ce_ser_o[1] = np.dot(rec_probs, rec_obj2)  ## TODO: CHANGES TO BE ADDED HERE
 
 print("Expected return o1 and o2: ", ce_ser_o)
-ce_ser = [calc_ser(i, ce_ser_o) for i in range(2)] ## THIS BLOCK OF CODE IS FUCKING STUPID. YOU COULD HAVE A CHECK PLACED AROUND IT TO EASILY DETECT WHAT KIND OF AGENT IT IS
-print("SER Agent 1 and 2: ", ce_ser)
 
+ce_ser = [calc_ser(i, ce_ser_o) for i in range(2)]
+
+print("SER Agent 1 and 2: ", ce_ser)
 
 num_agents = 2
 num_actions = payoffsObj1.shape[0]
@@ -219,7 +224,7 @@ num_states = num_actions  # as the number of states is equal to the number of po
 agents = []
 prev_states = [0, 0]
 selected_actions = [-1, -1]
-payoffs = [-1, -1]   # [WHAT IN GODS NAME ARE YOU FOR?]
+payoffs = [-1, -1]  # [WHAT IN GODS NAME ARE YOU FOR?]
 current_states = [0, 0]
 alpha = 0.05
 alpha_start = 0.05
@@ -245,6 +250,9 @@ num_episodes = args.episodes
 
 payoff_episode_log1 = []
 payoff_episode_log2 = []
+
+payoff_ep_logs = [payoff_episode_log1, payoff_episode_log2]
+
 state_distribution_log = np.zeros((num_actions, num_actions))
 action_hist = [[], []]
 act_hist_log = [[], []]
@@ -258,21 +266,18 @@ else:
 
 path_data = f'data/{game}'
 
-
 if opt_init:
-    path_data +='/opt_init'
+    path_data += '/opt_init'
 else:
-    path_data +='/zero_init'
+    path_data += '/zero_init'
 
 if rand_prob:
     path_data += '/opt_rand'
 else:
     path_data += '/opt_eq'
 
-
 print(path_data)
 mkdir_p(path_data)
-
 
 #  this whole block will need some heavy changes, particularly around the calc_returns function
 start = time.time()
@@ -284,10 +289,16 @@ for r in range(num_runs):
         do_episode(e)
 
         #  TODO: Rework this segment, it calls the calc_ser method unrelated to any object in particular... but how?
+        for i in range(num_agents):
+            if isinstance(agents[i], SERLearner):
+                payoff_ep_logs[i].append([e, r, SERql.calc_ser(i, payoffs[1])])
+            elif isinstance(agents[i], ESRLearner):
+                pass # got to figure this segment out.
 
-        # simple if else rework with if agent = ser, elif etc...
-        payoff_episode_log1.append([e, r, ql.calc_ser(0, payoffs[0])])  ### where does payoffs[] list come from?
-        payoff_episode_log2.append([e, r, ql.calc_ser(1, payoffs[1])])
+        # OLD CODE:
+        # payoff_episode_log1.append([e, r, SERql.calc_ser(0, payoffs[0])])  ### where does payoffs[] list come from?
+        # payoff_episode_log2.append([e, r, SERql.calc_ser(1, payoffs[1])])
+
         for i in range(num_agents):
             action_hist[i].append(selected_actions[i])
         if e >= 0.9 * num_episodes:
@@ -298,8 +309,8 @@ for r in range(num_runs):
     # transform action history into probabilities
     for a, el in enumerate(action_hist):
         for i in range(len(el)):
-            if i+window < len(el):
-                count = Counter(el[i:i+window])
+            if i + window < len(el):
+                count = Counter(el[i:i + window])
             else:
                 count = Counter(el[-window:])
             total = sum(count.values())
@@ -335,7 +346,6 @@ df2 = pd.DataFrame(act_hist_log[1], columns=columns)
 
 df1.to_csv(f'{path_data}/agent1_probs_{info}.csv', index=False)
 df2.to_csv(f'{path_data}/agent2_probs_{info}.csv', index=False)
-
 
 state_distribution_log /= num_runs * (0.1 * num_episodes)
 df = pd.DataFrame(state_distribution_log)

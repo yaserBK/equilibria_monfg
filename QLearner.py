@@ -9,10 +9,9 @@ from abc import ABC, abstractmethod
 
 
 class QLearner(ABC):
-    def __init__(self, agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, obj_fn, opt=False,
+    def __init__(self, agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt=False,
                  multi_ce=False, single_ce=False, rand_prob=False, ce_sgn=None):
         self.agent_id = agent_id
-        self.obj_fn = obj_fn  # specify which objective function the agent uses
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
@@ -80,21 +79,10 @@ class QLearner(ABC):
     def calc_returns(self, agent, vector):
         pass
 
-    def print_name(self):
-        print("zing")
-
     # Calculates the expected payoff vector for a given strategy using the agent's own Q values
+    @abstractmethod
     def calc_expected_vec(self, state, strategy):
-        expected_vec = np.zeros(self.num_objectives)
-        if not self.multi_CE:
-            for o in range(self.num_objectives):
-                expected_vec[o] = np.dot(self.q_table[state, :, o], np.array(strategy))
-        else:
-            expected_tmp = sum(self.ce_sgn[i] * self.q_table[i, :, :] for i in range(len(self.ce_sgn)))
-            # print("Expectation over signals:", expected_tmp)
-            for o in range(self.num_objectives):
-                expected_vec[o] = np.dot(expected_tmp[:, o], np.array(strategy))
-        return expected_vec
+        pass
 
     @staticmethod
     def select_recommended_action(state):
