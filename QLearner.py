@@ -80,9 +80,6 @@ class QLearner(ABC):
     def calc_returns(self, agent, vector):
         pass
 
-    def print_name(self):
-        print("zing")
-
     # Calculates the expected payoff vector for a given strategy using the agent's own Q values
     def calc_expected_vec(self, state, strategy):
         expected_vec = np.zeros(self.num_objectives)
