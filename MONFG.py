@@ -1,17 +1,13 @@
 import random
 import pandas as pd
-import SERLearner as SERql
-import ESRLearner as ESRql
+import QLearnerSER as ql
 import numpy as np
-from SERLearner import SERLearner, calc_ser
-from ESRLearner import ESRLearner, calc_esr
+from QLearnerSER import QLearnerSER, calc_ser
+from QLearnerESR import QLearnerESR
 from collections import Counter
 import time
 import argparse
 from utils import *
-
-
-#  TODO: MIGHT HAVE TO COMPLETELY REWORK THIS CLASS!!! NO BIG DEAL.
 
 
 def get_recommendations():
@@ -31,7 +27,6 @@ def get_recommendations():
     return recommendation
 
 
-# returns choice of selected actions, used in calcpayoffs method.
 def select_actions(states):
     selected = []
     for ag in range(num_agents):
@@ -47,7 +42,7 @@ def select_recommended_actions(states):
 
 
 def calc_payoffs():
-    global payoffs  # YASER - SO THIS IS WHERE PAYOFFS ARE DECLARED!!!!!!!
+    global payoffs
     payoffs.clear()
     for ag in range(num_agents):
         payoffs.append([payoffsObj1[selected_actions[0]][selected_actions[1]],
@@ -55,7 +50,7 @@ def calc_payoffs():
 
 
 def decay_params():
-    alpha, epsilon
+    global alpha, epsilon
     alpha *= alpha_decay
     epsilon *= epsilon_decay
     for ag in range(num_agents):
@@ -65,31 +60,37 @@ def decay_params():
 
 def update():
     for ag in range(num_agents):
-        agents[ag].update_q_table(prev_states[ag], selected_actions[ag], current_states[ag], payoffs[ag])
-
+        if optimization_criteria[ag] == "SER":
+            agents[ag].update_q_table(prev_states[ag], selected_actions[ag], current_states[ag], payoffs[ag])
+        elif optimization_criteria[ag] == "ESR":
+            agents[ag].update_q_table(prev_states[ag], selected_actions[ag], current_states[ag], payoffs[ag])
 
 def do_episode(ep):
     global prev_states, selected_actions, payoffs, current_states
     if provide_recs:
         prev_states = get_recommendations()
     if ep < recommendation_time:
-        selected_actions = select_recommended_actions(prev_states)  ### Modify this method
+        selected_actions = select_recommended_actions(prev_states)
     else:
-        selected_actions = select_actions(prev_states)  ### MODIFY this method
+        selected_actions = select_actions(prev_states)
     calc_payoffs()
     update()
     if ep > recommendation_time:
         decay_params()
 
 
-# HERE IS WHERE WE NEED TO MODIFY THE CODE TO INCLUDE THE INIT OF ESR AGENTS
 def reset(opt=False, rand_prob=False):
-    global agents, current_states, selected_actions, alpha, epsilon
+    global agents, current_states, selected_actions, alpha, epsilon, optimization_criteria
     agents.clear()
     for ag in range(num_agents):
-        new_agent = SERLearner(ag, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt, multi_ce,
-                               ce_ser[ag], single_ce, rand_prob, CE_sgn[ag])
-        agents.append(new_agent)
+        if optimization_criteria[ag] == "SER":
+            new_agent = QLearnerSER(ag, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt, multi_ce,
+                                    ce_ser[ag], single_ce, rand_prob, CE_sgn[ag])
+            agents.append(new_agent)
+        elif optimization_criteria[ag] == "ESR":
+            new_agent = QLearnerESR(ag, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt, multi_ce,
+                                    ce_ser[ag], single_ce, rand_prob, CE_sgn[ag])
+            agents.append(new_agent)
     current_states = [0, 0]
     selected_actions = [-1, -1]
     alpha = alpha_start
@@ -109,9 +110,8 @@ parser.add_argument('-rec_time', type=int, default=0, help="define the number of
 parser.add_argument('-runs', type=int, default=100, help="number of trials")
 parser.add_argument('-episodes', type=int, default=10000, help="number of episodes")
 
-#  Allows the user to chose optimization criteria (either SER or ESR) for row and column players
-parser.add_argument('-row', type=str, default="SER", help="specify optimization criteria for row player")
-parser.add_argument('-column', type=str, default="SER", help="specify optimization criteria for column player")
+parser.add_argument('-row', type=str, default="SER", help="optimization criteria for row player")
+parser.add_argument('-column', type=str, default="SER", help="optimization criteria for column player")
 
 '''
 Game 1, run multi-signal CE, under SER
@@ -126,21 +126,24 @@ python MONFG.py -game game1
 
 args = parser.parse_args()
 
-game = args.game  #### YOINKS GAME PARAMETER
+game = args.game
 
 num_objectives = 2
 ce_ser = None
+ce_agents = None #used for cases where agents have different optimization criteria
+
+row_opt_crit = args.row
+col_opt_crit = args.column
+optimization_criteria = [row_opt_crit, col_opt_crit]
 
 if game == 'game1':
     # original (Im)balancing act game
     payoffsObj1 = np.array([[4, 3, 2],
                             [3, 2, 1],
                             [2, 1, 0]])
-
     payoffsObj2 = np.array([[0, 1, 2],
                             [1, 2, 3],
                             [2, 3, 4]])
-
     rec_probs = [0.75, 0.25]
     recs = [[0, 1], [2, 1]]
     CE_sgn = [[0.75, 0, 0.25], [0, 1, 0]]
@@ -150,10 +153,8 @@ elif game == 'game2noM':
     # 2 action game that has no NE, it is the original (Im)balancing act game without M
     payoffsObj1 = np.array([[4, 2],
                             [2, 0]])
-
     payoffsObj2 = np.array([[0, 2],
                             [2, 4]])
-
     rec_probs = [0.25, 0.25, 0.25, 0.25]
     recs = [[0, 0], [0, 1], [1, 0], [1, 1]]
     CE_sgn = [[0.5, 0.5], [0.5, 0.5]]
@@ -163,10 +164,8 @@ elif game == 'game2noR':
     # the pure strategy NE is (L,M)
     payoffsObj1 = np.array([[4, 3],
                             [3, 2]])
-
     payoffsObj2 = np.array([[0, 1],
                             [1, 2]])
-
     rec_probs = [1.0]
     recs = [[0, 1]]
     CE_sgn = [[1.0, 0.0], [0.0, 1.0]]
@@ -177,11 +176,9 @@ elif game == 'game4':
     payoffsObj1 = np.array([[4, 1, 2],
                             [3, 3, 1],
                             [1, 2, 1]])
-
     payoffsObj2 = np.array([[1, 2, 1],
                             [1, 2, 2],
                             [2, 1, 3]])
-
     rec_probs = [0.5, 0.5]
     recs = [[0, 0], [1, 1]]
     # rec_probs = [1.0]
@@ -193,30 +190,28 @@ else:
     # 2 action game that has multiple pure strategy NE
     payoffsObj1 = np.array([[4, 1],
                             [3, 3]])
-
     payoffsObj2 = np.array([[1, 2],
                             [1, 2]])
-
     rec_probs = [0.5, 0.5]
     recs = [[0, 0], [1, 1]]
     CE_sgn = [[0.5, 0.5], [0.5, 0.5]]
 
-### TODO: THIS BLOCK NEEDS MODIFICATION
 
+# this portion is easily flipped for ESR
+#TODO: MODIFY THIS CODEBLOCK FOR BOTH OPTIMIZATION CRITERIA CALCULATIONS.
 
-ce_ser_o = np.zeros(num_objectives)  # TODO: CHANGES TO BE ADDED HERE (lines 184 - 185)
+if optimization_criteria[0] == "SER" and optimization_criteria[1] == "SER":
+    ce_ser_o = np.zeros(num_objectives)
+    rec_obj1 = [payoffsObj1[el[0], el[1]] for el in recs]
+    ce_ser_o[0] = np.dot(rec_probs, rec_obj1)
+    rec_obj2 = [payoffsObj2[el[0], el[1]] for el in recs]
+    ce_ser_o[1] = np.dot(rec_probs, rec_obj2)
 
-rec_obj1 = [payoffsObj1[el[0], el[1]] for el in recs]
-ce_ser_o[0] = np.dot(rec_probs, rec_obj1)
-
-rec_obj2 = [payoffsObj2[el[0], el[1]] for el in recs]
-ce_ser_o[1] = np.dot(rec_probs, rec_obj2)  ## TODO: CHANGES TO BE ADDED HERE
-
-print("Expected return o1 and o2: ", ce_ser_o)
-
-ce_ser = [calc_ser(i, ce_ser_o) for i in range(2)]
-
-print("SER Agent 1 and 2: ", ce_ser)
+    print("Expected return o1 and o2: ", ce_ser_o)
+    ce_ser = [calc_ser(i, ce_ser_o) for i in range(2)]
+    print("SER Agent 1 and 2: ", ce_ser)
+else:
+    pass
 
 num_agents = 2
 num_actions = payoffsObj1.shape[0]
@@ -224,7 +219,7 @@ num_states = num_actions  # as the number of states is equal to the number of po
 agents = []
 prev_states = [0, 0]
 selected_actions = [-1, -1]
-payoffs = [-1, -1]  # [WHAT IN GODS NAME ARE YOU FOR?]
+payoffs = [-1, -1]
 current_states = [0, 0]
 alpha = 0.05
 alpha_start = 0.05
@@ -250,9 +245,6 @@ num_episodes = args.episodes
 
 payoff_episode_log1 = []
 payoff_episode_log2 = []
-
-payoff_ep_logs = [payoff_episode_log1, payoff_episode_log2]
-
 state_distribution_log = np.zeros((num_actions, num_actions))
 action_hist = [[], []]
 act_hist_log = [[], []]
@@ -279,7 +271,6 @@ else:
 print(path_data)
 mkdir_p(path_data)
 
-#  this whole block will need some heavy changes, particularly around the calc_returns function
 start = time.time()
 for r in range(num_runs):
     print("Starting run ", r)
@@ -287,18 +278,8 @@ for r in range(num_runs):
     action_hist = [[], []]
     for e in range(num_episodes):
         do_episode(e)
-
-        #  TODO: Rework this segment, it calls the calc_ser method unrelated to any object in particular... but how?
-        for i in range(num_agents):
-            if isinstance(agents[i], SERLearner):
-                payoff_ep_logs[i].append([e, r, SERql.calc_ser(i, payoffs[1])])
-            elif isinstance(agents[i], ESRLearner):
-                pass # got to figure this segment out.
-
-        # OLD CODE:
-        # payoff_episode_log1.append([e, r, SERql.calc_ser(0, payoffs[0])])  ### where does payoffs[] list come from?
-        # payoff_episode_log2.append([e, r, SERql.calc_ser(1, payoffs[1])])
-
+        payoff_episode_log1.append([e, r, ql.calc_ser(0, payoffs[0])])
+        payoff_episode_log2.append([e, r, ql.calc_ser(1, payoffs[1])])
         for i in range(num_agents):
             action_hist[i].append(selected_actions[i])
         if e >= 0.9 * num_episodes:
