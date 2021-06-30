@@ -12,7 +12,7 @@ sns.set_context("paper", rc={"font.size":18,"axes.labelsize":18,"xtick.labelsize
 sns.set_style('white', {'axes.edgecolor': "0.5","pdf.fonttype": 42})
 plt.gcf().subplots_adjust(bottom=0.15)
 
-provide_recs = True
+provide_recs = False
 recommendation_time = 500
 multi_CE = False
 single_ce = not multi_CE

@@ -15,25 +15,37 @@ class QLearnerESR:
         self.epsilon = epsilon
         self.num_states = num_states
         self.num_actions = num_actions
-        self.num_objectives = num_objectives
+        self.num_objectives = 1
         # optimistic initialization of Q-table
         if opt:
-            self.q_table = np.ones((num_states, num_actions)) * 20
+            self.q_table = np.ones((num_states, num_actions, self.num_objectives)) * 20
         else:
-            self.q_table = np.zeros((num_states, num_actions))
+            self.q_table = np.zeros((num_states, num_actions, self.num_objectives))
         self.current_state = -1
         self.multi_CE = multi_ce
         self.ce_esr = ce_esr
         self.single_CE = single_ce
         self.rand_prob = rand_prob
         self.ce_sgn = ce_sgn
+        self.sc = 0
 
-    # Q table updated using scalar of payoff(reward) vector
+    # # Q table updated using scalar of payoff(reward) vector
+    # def update_q_table(self, prev_state, action, curr_state, reward):
+    #     old_q = self.q_table[prev_state][action]
+    #     next_q = self.q_table[curr_state, :]
+    #     new_q = old_q + self.alpha * (self.scalarize(reward) + self.gamma * max(next_q[:]) - old_q)
+    #     self.q_table[prev_state][action] = new_q
+
+
     def update_q_table(self, prev_state, action, curr_state, reward):
+        scalarized_reward = self.scalarize(reward)
         old_q = self.q_table[prev_state][action]
         next_q = self.q_table[curr_state, :]
-        new_q = old_q + self.alpha * (self.scalarize(reward) + self.gamma * max(next_q[:]) - old_q)
-        self.q_table[prev_state][action] = new_q
+        new_q = np.zeros(self.num_objectives)
+        for o in range(self.num_objectives):
+            new_q[o] = old_q[o] + self.alpha * (scalarized_reward + self.gamma * max(next_q[:, o]) - old_q[o])
+            self.q_table[prev_state][action][o] = new_q[o]
+
 
     # random action selection
     def select_random_action(self):
@@ -97,17 +109,31 @@ class QLearnerESR:
 
     # Calculates the expected payoff vector for a given strategy using the agent's own Q values
     # TODO: THIS SEGMENT NEEDS SOME CLEANING UP
-    def calc_expected_scalar(self, state, strategy):
-        expected_scalar = None
-        if not self.multi_CE:
-            expected_scalar = np.dot(self.q_table[state, :], strategy)
+    # def calc_expected_scalar(self, state, strategy):
+    #
+    #     if not self.multi_CE:
+    #         expected_scalar = np.dot(self.q_table[state, :], strategy)
+    #
+    #     else:
+    #         expected_tmp = sum(self.ce_sgn[i] * self.q_table[i, :] for i in range(len(self.ce_sgn)))
+    #         # print("Expectation over signals:", expected_tmp)
+    #
+    #         expected_scalar = np.dot(expected_tmp[:], np.array(strategy))
+    #         self.sc = expected_scalar
+    #     return expected_scalar
 
+    def calc_expected_scalar(self, state, strategy):
+        expected_scal = None
+        if not self.multi_CE:
+            for o in range(self.num_objectives):
+                expected_scal = np.dot(self.q_table[state, :, o], np.array(strategy))
         else:
             expected_tmp = sum(self.ce_sgn[i] * self.q_table[i, :] for i in range(len(self.ce_sgn)))
             # print("Expectation over signals:", expected_tmp)
+            for o in range(self.num_objectives):
+                expected_scal = np.dot(expected_tmp[:], np.array(strategy))
+        return expected_scal
 
-            expected_scalar = np.dot(expected_tmp[:], np.array(strategy))
-        return expected_scalar
 
     @staticmethod
     def select_recommended_action(state):

@@ -85,11 +85,11 @@ def reset(opt=False, rand_prob=False):
     for ag in range(num_agents):
         if optimization_criteria[ag] == "SER":
             new_agent = QLearnerSER(ag, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt, multi_ce,
-                                    ce_ser[ag], single_ce, rand_prob, CE_sgn[ag])
+                                    correlated_returns[ag], single_ce, rand_prob, CE_sgn[ag])
             agents.append(new_agent)
         elif optimization_criteria[ag] == "ESR":
             new_agent = QLearnerESR(ag, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt, multi_ce,
-                                    ce_ser[ag], single_ce, rand_prob, CE_sgn[ag])
+                                    correlated_returns[ag], single_ce, rand_prob, CE_sgn[ag])
             agents.append(new_agent)
     current_states = [0, 0]
     selected_actions = [-1, -1]
@@ -129,7 +129,7 @@ args = parser.parse_args()
 game = args.game
 
 num_objectives = 2
-ce_ser = None
+correlated_returns = None
 ce_agents = None #used for cases where agents have different optimization criteria
 
 row_opt_crit = args.row
@@ -200,18 +200,17 @@ else:
 # this portion is easily flipped for ESR
 #TODO: MODIFY THIS CODEBLOCK FOR BOTH OPTIMIZATION CRITERIA CALCULATIONS.
 
-if optimization_criteria[0] == "SER" and optimization_criteria[1] == "SER":
-    ce_ser_o = np.zeros(num_objectives)
-    rec_obj1 = [payoffsObj1[el[0], el[1]] for el in recs]
-    ce_ser_o[0] = np.dot(rec_probs, rec_obj1)
-    rec_obj2 = [payoffsObj2[el[0], el[1]] for el in recs]
-    ce_ser_o[1] = np.dot(rec_probs, rec_obj2)
+#if optimization_criteria[0] == "SER" and optimization_criteria[1] == "SER":
+ce_ser_o = np.zeros(num_objectives)
+rec_obj1 = [payoffsObj1[el[0], el[1]] for el in recs]
+ce_ser_o[0] = np.dot(rec_probs, rec_obj1)
+rec_obj2 = [payoffsObj2[el[0], el[1]] for el in recs]
+ce_ser_o[1] = np.dot(rec_probs, rec_obj2)
 
-    print("Expected return o1 and o2: ", ce_ser_o)
-    ce_ser = [calc_ser(i, ce_ser_o) for i in range(2)]
-    print("SER Agent 1 and 2: ", ce_ser)
-else:
-    pass
+print("Expected return o1 and o2: ", ce_ser_o)
+correlated_returns = [calc_ser(i, ce_ser_o) for i in range(2)]
+print("SER Agent 1 and 2: ", correlated_returns)
+#else: pass
 
 num_agents = 2
 num_actions = payoffsObj1.shape[0]
