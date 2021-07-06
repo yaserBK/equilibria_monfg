@@ -19,8 +19,13 @@ single_ce = not multi_CE
 rand_prob = False
 episodes = 10000
 
+#  Set according to row/column player MO-Optimization Criteria
+agent1_opt_crit = 'ESR'
+agent2_opt_crit = 'SER'
+
+
 # ['game1', 'game2noM', 'game2noR', 'game3', 'game4']:
-for game in ['game1']:
+for game in ['game1', 'game2noM', 'game2noR', 'game4','game5']:
     for opt_init in [False]: #[True, False]:
         path_data = f'data/{game}'
         path_plots = f'plots/{game}'
@@ -39,6 +44,8 @@ for game in ['game1']:
             path_data += '/opt_eq'
             path_plots += '/opt_eq'
 
+        path_data += f'/row{agent1_opt_crit}_col{agent2_opt_crit}'
+        path_plots += f'/row{agent1_opt_crit}_col{agent2_opt_crit}'
 
         print(path_plots)
         mkdir_p(path_plots)
@@ -63,7 +70,7 @@ for game in ['game1']:
         ax.set(ylabel='Scalarised payoff')
         ax.set_ylim(1, 18)
         ax.set_xlim(0, episodes)
-        plot_name = f"{path_plots}/{game}_SER_{info}"
+        plot_name = f"{path_plots}/{game}_returns_{info}"
 
         plt.savefig(plot_name + ".pdf")
         plt.clf()
@@ -72,12 +79,20 @@ for game in ['game1']:
         df1 = pd.read_csv(f'{path_data}/agent1_probs_{info}.csv')
         df1 = df1.iloc[::5, :]
 
+
         if game == 'game2noM':
             label2 = 'R'
+            label1 = 'L'
         else:
             label2 = 'M'
+            label1 = 'L'
 
-        ax = sns.lineplot(x='Episode', y='Action 1', linewidth=2.0, data=df1, ci='sd', label='L')
+        if game == 'chicken':
+            label1 = "S"
+            label2 = "D"
+
+
+        ax = sns.lineplot(x='Episode', y='Action 1', linewidth=2.0, data=df1, ci='sd', label=label1)
         ax = sns.lineplot(x='Episode', y='Action 2', linewidth=2.0, data=df1, ci='sd', label=label2)
 
         if game in ['game1', 'game4']:
@@ -86,7 +101,7 @@ for game in ['game1']:
         # if provide_recs:
         ax.set_ylim(-0.05, 1.05)
         ax.set_xlim(0, episodes)
-        plot_name = f"{path_plots}/{game}_SER_A1_{info}"
+        plot_name = f"{path_plots}/{game}_{agent1_opt_crit}_A1_{info}"
 
         plt.savefig(plot_name + ".pdf")
         plt.clf()
@@ -95,7 +110,7 @@ for game in ['game1']:
         df1 = pd.read_csv(f'{path_data}/agent2_probs_{info}.csv')
         df1 = df1.iloc[::5, :]
 
-        ax = sns.lineplot(x='Episode', y='Action 1', linewidth=2.0, data=df1, ci='sd', label='L')
+        ax = sns.lineplot(x='Episode', y='Action 1', linewidth=2.0, data=df1, ci='sd', label=label1)
         ax = sns.lineplot(x='Episode', y='Action 2', linewidth=2.0, data=df1, ci='sd', label=label2)
         if game in ['game1', 'game4']:
             ax = sns.lineplot(x='Episode', y='Action 3', linewidth=2.0, data=df1, ci='sd', label='R')
@@ -103,7 +118,7 @@ for game in ['game1']:
         #if provide_recs:
         ax.set_ylim(-0.05, 1.05)
         ax.set_xlim(0, episodes)
-        plot_name = f"{path_plots}/{game}_SER_A2_{info}"
+        plot_name = f"{path_plots}/{game}_{agent2_opt_crit}_A2_{info}"
 
         plt.savefig(plot_name + ".pdf")
         plt.clf()
@@ -114,6 +129,10 @@ for game in ['game1']:
         if game == 'game2noM':
             x_axis_labels = ["L", "R"]
             y_axis_labels = ["L", "R"]
+
+        if game == 'chicken':
+            x_axis_labels = ["S", "D"]
+            y_axis_labels = ["S", "D"]
 
         if game in ['game2noR', 'game3']:
             x_axis_labels = ["L", "M"]

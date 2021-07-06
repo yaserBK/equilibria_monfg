@@ -110,8 +110,8 @@ parser.add_argument('-rec_time', type=int, default=0, help="define the number of
 parser.add_argument('-runs', type=int, default=100, help="number of trials")
 parser.add_argument('-episodes', type=int, default=10000, help="number of episodes")
 
-parser.add_argument('-row', type=str, default="SER", help="optimization criteria for row player")
-parser.add_argument('-column', type=str, default="SER", help="optimization criteria for column player")
+parser.add_argument('-row', type=str, default='SER', help="optimization criteria for row player")
+parser.add_argument('-column', type=str, default='SER', help="optimization criteria for column player")
 
 '''
 Game 1, run multi-signal CE, under SER
@@ -147,7 +147,6 @@ if game == 'game1':
     rec_probs = [0.75, 0.25]
     recs = [[0, 1], [2, 1]]
     CE_sgn = [[0.75, 0, 0.25], [0, 1, 0]]
-
 
 elif game == 'game2noM':
     # 2 action game that has no NE, it is the original (Im)balancing act game without M
@@ -186,7 +185,17 @@ elif game == 'game4':
     # recs = [[1, 1]]
     CE_sgn = [[0.5, 0.5, 0.0], [0.5, 0.5, 0.0]]
 
-else:
+elif game == "chicken":
+ # game of chicken for optimizer validation
+    payoffsObj1 = np.array([[6, 2],
+                            [7, 0]])
+    payoffsObj2 = np.array([[6, 7],
+                            [2, 0]])
+    rec_probs = [1.0]
+    recs = [[0, 1]]
+    CE_sgn = [[1.0, 0.0], [0.0, 1.0]]
+
+else:  # game5
     # 2 action game that has multiple pure strategy NE
     payoffsObj1 = np.array([[4, 1],
                             [3, 3]])
@@ -266,6 +275,8 @@ if rand_prob:
     path_data += '/opt_rand'
 else:
     path_data += '/opt_eq'
+
+path_data += f'/row{optimization_criteria[0]}_col{optimization_criteria[1]}'
 
 print(path_data)
 mkdir_p(path_data)

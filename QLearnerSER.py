@@ -115,12 +115,21 @@ class QLearnerSER:
         return state
 
 
+# def calc_ser(agent, vector):
+#     ser = 0
+#     if agent == 0:
+#         ser = vector[0] ** 2 + vector[1] ** 2
+#     elif agent == 1:
+#         ser = vector[0] * vector[1]
+#     return ser
+
+
 def calc_ser(agent, vector):
     ser = 0
     if agent == 0:
-        ser = vector[0] ** 2 + vector[1] ** 2
+        ser = vector[0]
     elif agent == 1:
-        ser = vector[0] * vector[1]
+        ser = vector[1]
     return ser
 
 

@@ -29,12 +29,7 @@ class QLearnerESR:
         self.ce_sgn = ce_sgn
         self.sc = 0
 
-    # # Q table updated using scalar of payoff(reward) vector
-    # def update_q_table(self, prev_state, action, curr_state, reward):
-    #     old_q = self.q_table[prev_state][action]
-    #     next_q = self.q_table[curr_state, :]
-    #     new_q = old_q + self.alpha * (self.scalarize(reward) + self.gamma * max(next_q[:]) - old_q)
-    #     self.q_table[prev_state][action] = new_q
+
 
 
     def update_q_table(self, prev_state, action, curr_state, reward):
@@ -107,21 +102,6 @@ class QLearnerESR:
         esr = self.calc_expected_scalar(self.current_state, strategy)
         return esr
 
-    # Calculates the expected payoff vector for a given strategy using the agent's own Q values
-    # TODO: THIS SEGMENT NEEDS SOME CLEANING UP
-    # def calc_expected_scalar(self, state, strategy):
-    #
-    #     if not self.multi_CE:
-    #         expected_scalar = np.dot(self.q_table[state, :], strategy)
-    #
-    #     else:
-    #         expected_tmp = sum(self.ce_sgn[i] * self.q_table[i, :] for i in range(len(self.ce_sgn)))
-    #         # print("Expectation over signals:", expected_tmp)
-    #
-    #         expected_scalar = np.dot(expected_tmp[:], np.array(strategy))
-    #         self.sc = expected_scalar
-    #     return expected_scalar
-
     def calc_expected_scalar(self, state, strategy):
         expected_scal = None
         if not self.multi_CE:
@@ -139,12 +119,23 @@ class QLearnerESR:
     def select_recommended_action(state):
         return state
 
+
+    #FOR MONFG
+    # def scalarize(self, rewards):
+    #     scalar = None
+    #     if self.agent_id == 0:
+    #         scalar = (rewards[0] * rewards[0]) + (rewards[1] * rewards[1])
+    #     elif self.agent_id == 1:
+    #         scalar = rewards[0] * rewards[1]
+    #     return scalar
+
+    # For single objective NFG optimization.
     def scalarize(self, rewards):
         scalar = None
         if self.agent_id == 0:
-            scalar = (rewards[0] * rewards[0]) + (rewards[1] * rewards[1])
+            scalar = rewards[0]
         elif self.agent_id == 1:
-            scalar = rewards[0] * rewards[1]
+            scalar = rewards[1]
         return scalar
 
 
