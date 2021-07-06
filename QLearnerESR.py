@@ -1,9 +1,6 @@
 import random
 import numpy as np
 from scipy.optimize import minimize
-import warnings
-# from utils import *
-import itertools
 
 
 class QLearnerESR:
@@ -29,9 +26,6 @@ class QLearnerESR:
         self.ce_sgn = ce_sgn
         self.sc = 0
 
-
-
-
     def update_q_table(self, prev_state, action, curr_state, reward):
         scalarized_reward = self.scalarize(reward)
         old_q = self.q_table[prev_state][action]
@@ -40,7 +34,6 @@ class QLearnerESR:
         for o in range(self.num_objectives):
             new_q[o] = old_q[o] + self.alpha * (scalarized_reward + self.gamma * max(next_q[:, o]) - old_q[o])
             self.q_table[prev_state][action][o] = new_q[o]
-
 
     # random action selection
     def select_random_action(self):
@@ -114,13 +107,11 @@ class QLearnerESR:
                 expected_scal = np.dot(expected_tmp[:], np.array(strategy))
         return expected_scal
 
-
     @staticmethod
     def select_recommended_action(state):
         return state
 
-
-    #FOR MONFG
+    # FOR MONFG
     # def scalarize(self, rewards):
     #     scalar = None
     #     if self.agent_id == 0:

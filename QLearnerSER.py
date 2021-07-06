@@ -1,9 +1,7 @@
 import random
 import numpy as np
 from scipy.optimize import minimize
-import warnings
-#from utils import *
-import itertools
+
 
 
 class QLearnerSER:
@@ -64,7 +62,7 @@ class QLearnerSER:
             s0 = np.random.random(self.num_actions)
             s0 /= np.sum(s0)
         else:
-            s0 = np.full(self.num_actions, 1.0/self.num_actions)  # initial guess set to equal prob over all actions
+            s0 = np.full(self.num_actions, 1.0 / self.num_actions)  # initial guess set to equal prob over all actions
 
         b = (0.0, 1.0)
         bnds = (b,) * self.num_actions

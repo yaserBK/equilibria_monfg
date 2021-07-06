@@ -19,11 +19,11 @@ single_ce = not multi_CE
 rand_prob = False
 episodes = 10000
 
-#  Set according to row/column player MO-Optimization Criteria
+#  Specify Agent type here
 agent1_opt_crit = 'ESR'
 agent2_opt_crit = 'SER'
 
-
+# specify games to be plotted in the for-loop condition below
 # ['game1', 'game2noM', 'game2noR', 'game3', 'game4']:
 for game in ['game1', 'game2noM', 'game2noR', 'game4','game5']:
     for opt_init in [False]: #[True, False]:
