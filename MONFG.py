@@ -33,14 +33,14 @@ def select_actions(states):
         selected.append(agents[ag].select_action_mixed_nonlinear(states[ag]))
     return selected
 
-
+#  tells each agent to select the recommended action
 def select_recommended_actions(states):
     selected = []
     for ag in range(num_agents):
         selected.append(agents[ag].select_recommended_action(states[ag]))
     return selected
 
-
+#  calculates payoffs for all agents
 def calc_payoffs():
     global payoffs
     payoffs.clear()
@@ -48,7 +48,7 @@ def calc_payoffs():
         payoffs.append([payoffsObj1[selected_actions[0]][selected_actions[1]],
                         payoffsObj2[selected_actions[0]][selected_actions[1]]])
 
-
+# decays epsilon and gamma parameters for each agent in agents[]
 def decay_params():
     global alpha, epsilon
     alpha *= alpha_decay
@@ -57,7 +57,7 @@ def decay_params():
         agents[ag].alpha = alpha
         agents[ag].epsilon = epsilon
 
-
+#  Updates Q-tables for each agent in agents[]
 def update():
     for ag in range(num_agents):
         if optimization_criteria[ag] == "SER":
@@ -66,6 +66,7 @@ def update():
             agents[ag].update_q_table(prev_states[ag], selected_actions[ag], current_states[ag], payoffs[ag])
 
 def do_episode(ep):
+    # runs single episodes and calculates payoffs
     global prev_states, selected_actions, payoffs, current_states
     if provide_recs:
         prev_states = get_recommendations()
@@ -82,6 +83,9 @@ def do_episode(ep):
 def reset(opt=False, rand_prob=False):
     global agents, current_states, selected_actions, alpha, epsilon, optimization_criteria
     agents.clear()
+
+    # initialising agents based on user specified optimization criteria for each agent
+    # then appending them to agents[] list
     for ag in range(num_agents):
         if optimization_criteria[ag] == "SER":
             new_agent = QLearnerSER(ag, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt, multi_ce,
@@ -91,6 +95,7 @@ def reset(opt=False, rand_prob=False):
             new_agent = QLearnerESR(ag, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt, multi_ce,
                                     correlated_returns[ag], single_ce, rand_prob, CE_sgn[ag])
             agents.append(new_agent)
+
     current_states = [0, 0]
     selected_actions = [-1, -1]
     alpha = alpha_start
@@ -259,6 +264,7 @@ act_hist_log = [[], []]
 window = 100
 final_policy_log = [[], []]
 
+#  creates descriptive paths to store game result data in:
 if provide_recs:
     equil = 'CE'
 else:
@@ -281,6 +287,7 @@ path_data += f'/row{optimization_criteria[0]}_col{optimization_criteria[1]}'
 print(path_data)
 mkdir_p(path_data)
 
+#  The following block runs episodes/experiments
 start = time.time()
 for r in range(num_runs):
     print("Starting run ", r)
@@ -288,6 +295,7 @@ for r in range(num_runs):
     action_hist = [[], []]
     for e in range(num_episodes):
         do_episode(e)
+        #  Calculating scalarised returns for each agent and saving them in respective logs
         payoff_episode_log1.append([e, r, ql.calc_ser(0, payoffs[0])])
         payoff_episode_log2.append([e, r, ql.calc_ser(1, payoffs[1])])
         for i in range(num_agents):
@@ -314,6 +322,7 @@ end = time.time()
 elapsed_mins = (end - start) / 60.0
 print("Time elapsed: " + str(elapsed_mins))
 
+#  creates descriptive file structures to store results in
 info = ''
 if provide_recs:
     info += f'CE_{recommendation_time}_'
