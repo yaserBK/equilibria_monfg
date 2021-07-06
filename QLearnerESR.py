@@ -86,7 +86,7 @@ class QLearnerESR:
         return strategy
 
     # this is the objective function to be minimised by the nonlinear optimiser
-    # (therefore it returns the negative of SER)
+    # (therefore it returns the negative of ESR)
     def objective(self, strategy):
         return - self.calc_esr_from_strategy(strategy)
 

@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib
+
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
 import matplotlib.pyplot as plt
@@ -8,8 +9,9 @@ from utils import *
 
 sns.set()
 sns.despine()
-sns.set_context("paper", rc={"font.size":18,"axes.labelsize":18,"xtick.labelsize": 16,"ytick.labelsize": 16,"legend.fontsize": 16})
-sns.set_style('white', {'axes.edgecolor': "0.5","pdf.fonttype": 42})
+sns.set_context("paper", rc={"font.size": 18, "axes.labelsize": 18, "xtick.labelsize": 16, "ytick.labelsize": 16,
+                             "legend.fontsize": 16})
+sns.set_style('white', {'axes.edgecolor': "0.5", "pdf.fonttype": 42})
 plt.gcf().subplots_adjust(bottom=0.15)
 
 provide_recs = False
@@ -21,12 +23,12 @@ episodes = 10000
 
 #  Specify Agent type here
 agent1_opt_crit = 'ESR'
-agent2_opt_crit = 'SER'
+agent2_opt_crit = 'ESR'
 
 # specify games to be plotted in the for-loop condition below
 # ['game1', 'game2noM', 'game2noR', 'game3', 'game4']:
-for game in ['game1', 'game2noM', 'game2noR', 'game4','game5']:
-    for opt_init in [False]: #[True, False]:
+for game in ['prisoners']:
+    for opt_init in [False]:  # [True, False]:
         path_data = f'data/{game}'
         path_plots = f'plots/{game}'
 
@@ -79,7 +81,6 @@ for game in ['game1', 'game2noM', 'game2noR', 'game4','game5']:
         df1 = pd.read_csv(f'{path_data}/agent1_probs_{info}.csv')
         df1 = df1.iloc[::5, :]
 
-
         if game == 'game2noM':
             label2 = 'R'
             label1 = 'L'
@@ -91,6 +92,9 @@ for game in ['game1', 'game2noM', 'game2noR', 'game4','game5']:
             label1 = "S"
             label2 = "D"
 
+        if game == 'prisoners':
+            label1 = 'C'
+            label2 = 'D'
 
         ax = sns.lineplot(x='Episode', y='Action 1', linewidth=2.0, data=df1, ci='sd', label=label1)
         ax = sns.lineplot(x='Episode', y='Action 2', linewidth=2.0, data=df1, ci='sd', label=label2)
@@ -115,7 +119,7 @@ for game in ['game1', 'game2noM', 'game2noR', 'game4','game5']:
         if game in ['game1', 'game4']:
             ax = sns.lineplot(x='Episode', y='Action 3', linewidth=2.0, data=df1, ci='sd', label='R')
         ax.set(ylabel='Action probability')
-        #if provide_recs:
+        # if provide_recs:
         ax.set_ylim(-0.05, 1.05)
         ax.set_xlim(0, episodes)
         plot_name = f"{path_plots}/{game}_{agent2_opt_crit}_A2_{info}"
@@ -130,9 +134,13 @@ for game in ['game1', 'game2noM', 'game2noR', 'game4','game5']:
             x_axis_labels = ["L", "R"]
             y_axis_labels = ["L", "R"]
 
-        if game == 'chicken':
+        if game == 'prisoners':
             x_axis_labels = ["S", "D"]
             y_axis_labels = ["S", "D"]
+
+        if game == 'chicken':
+            x_axis_labels = ["C", "D"]
+            y_axis_labels = ["C", "D"]
 
         if game in ['game2noR', 'game3']:
             x_axis_labels = ["L", "M"]
@@ -142,9 +150,9 @@ for game in ['game1', 'game2noM', 'game2noR', 'game4','game5']:
             x_axis_labels = ["L", "M", "R"]
             y_axis_labels = ["L", "M", "R"]
 
-        ax = sns.heatmap(df, annot=True, cmap="YlGnBu", vmin=0, vmax=1, xticklabels=x_axis_labels, yticklabels=y_axis_labels)
+        ax = sns.heatmap(df, annot=True, cmap="YlGnBu", vmin=0, vmax=1, xticklabels=x_axis_labels,
+                         yticklabels=y_axis_labels)
         plot_name = f"{path_plots}/{game}_states_{info}"
 
         plt.savefig(plot_name + ".pdf")
         plt.clf()
-

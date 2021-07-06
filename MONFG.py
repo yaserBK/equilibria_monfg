@@ -33,12 +33,14 @@ def select_actions(states):
         selected.append(agents[ag].select_action_mixed_nonlinear(states[ag]))
     return selected
 
+
 #  tells each agent to select the recommended action
 def select_recommended_actions(states):
     selected = []
     for ag in range(num_agents):
         selected.append(agents[ag].select_recommended_action(states[ag]))
     return selected
+
 
 #  calculates payoffs for all agents
 def calc_payoffs():
@@ -47,6 +49,7 @@ def calc_payoffs():
     for ag in range(num_agents):
         payoffs.append([payoffsObj1[selected_actions[0]][selected_actions[1]],
                         payoffsObj2[selected_actions[0]][selected_actions[1]]])
+
 
 # decays epsilon and gamma parameters for each agent in agents[]
 def decay_params():
@@ -57,6 +60,7 @@ def decay_params():
         agents[ag].alpha = alpha
         agents[ag].epsilon = epsilon
 
+
 #  Updates Q-tables for each agent in agents[]
 def update():
     for ag in range(num_agents):
@@ -64,6 +68,7 @@ def update():
             agents[ag].update_q_table(prev_states[ag], selected_actions[ag], current_states[ag], payoffs[ag])
         elif optimization_criteria[ag] == "ESR":
             agents[ag].update_q_table(prev_states[ag], selected_actions[ag], current_states[ag], payoffs[ag])
+
 
 def do_episode(ep):
     # runs single episodes and calculates payoffs
@@ -135,7 +140,7 @@ game = args.game
 
 num_objectives = 2
 correlated_returns = None
-ce_agents = None #used for cases where agents have different optimization criteria
+ce_agents = None  # used for cases where agents have different optimization criteria
 
 row_opt_crit = args.row
 col_opt_crit = args.column
@@ -191,11 +196,21 @@ elif game == 'game4':
     CE_sgn = [[0.5, 0.5, 0.0], [0.5, 0.5, 0.0]]
 
 elif game == "chicken":
- # game of chicken for optimizer validation
+    # game of chicken for optimizer validation
     payoffsObj1 = np.array([[6, 2],
                             [7, 0]])
     payoffsObj2 = np.array([[6, 7],
                             [2, 0]])
+    rec_probs = [1.0]
+    recs = [[0, 1]]
+    CE_sgn = [[1.0, 0.0], [0.0, 1.0]]
+
+elif game == 'prisoners':
+    # game of chicken for optimizer validation
+    payoffsObj1 = np.array([[3, 0],
+                            [5, 1]])
+    payoffsObj2 = np.array([[3, 5],
+                            [0, 1]])
     rec_probs = [1.0]
     recs = [[0, 1]]
     CE_sgn = [[1.0, 0.0], [0.0, 1.0]]
@@ -210,11 +225,10 @@ else:  # game5
     recs = [[0, 0], [1, 1]]
     CE_sgn = [[0.5, 0.5], [0.5, 0.5]]
 
-
 # this portion is easily flipped for ESR
-#TODO: MODIFY THIS CODEBLOCK FOR BOTH OPTIMIZATION CRITERIA CALCULATIONS.
+# TODO: MODIFY THIS CODE BLOCK FOR BOTH OPTIMIZATION CRITERIA CALCULATIONS.
 
-#if optimization_criteria[0] == "SER" and optimization_criteria[1] == "SER":
+# if optimization_criteria[0] == "SER" and optimization_criteria[1] == "SER":
 ce_ser_o = np.zeros(num_objectives)
 rec_obj1 = [payoffsObj1[el[0], el[1]] for el in recs]
 ce_ser_o[0] = np.dot(rec_probs, rec_obj1)
@@ -224,7 +238,7 @@ ce_ser_o[1] = np.dot(rec_probs, rec_obj2)
 print("Expected return o1 and o2: ", ce_ser_o)
 correlated_returns = [calc_ser(i, ce_ser_o) for i in range(2)]
 print("SER Agent 1 and 2: ", correlated_returns)
-#else: pass
+# else: pass
 
 num_agents = 2
 num_actions = payoffsObj1.shape[0]

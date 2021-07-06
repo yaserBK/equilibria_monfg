@@ -3,7 +3,6 @@ import numpy as np
 from scipy.optimize import minimize
 
 
-
 class QLearnerSER:
     def __init__(self, agent_id, alpha, gamma, epsilon, num_states, num_actions, num_objectives, opt=False,
                  multi_ce=False, ce_ser=None, single_ce=False, rand_prob=False, ce_sgn=None):
@@ -122,6 +121,7 @@ class QLearnerSER:
 #     return ser
 
 
+#
 def calc_ser(agent, vector):
     ser = 0
     if agent == 0:
