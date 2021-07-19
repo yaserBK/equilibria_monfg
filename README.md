@@ -1,10 +1,10 @@
 # A utility-based analysis of equilibria in multi-objective normal form games
 
-Study of Nash and correlated equilibria in MONFGs, under the SER (scalarised expected returns) multi-objective criterion.
+Study of Nash and correlated equilibria in MONFGs, under the SER (scalarised expected returns) and ESR (expected scalarized returns) multi-objective criterion.
 
 ## Paper citation
 
-If you used our code for your experiments or found it helpful, consider citing the following paper:
+This fork expands upon the code used for experimentation in the following paper:
 
 <pre>
 @article{radulescu2020equilibria,
@@ -18,7 +18,10 @@ note="In press"
 
 ## Getting Started
 
-Experiments can be run from the `MONFG.py` file. There are 5 MONFGs available, having different equilibria properties under the SER optimisation criterion, using the specified non linear utility functions. 
+Experiments can be run from the `MONFG.py` file. There are  MONFGs available, having different equilibria properties under the SER optimisation criterion, using the specified non linear utility functions. 
+
+The code-base can also be adjusted as needed to run single-objective normal form games such as chicken, battle of the sexes, the prisoners dilemma, etc. 
+
 
 ## License
 
